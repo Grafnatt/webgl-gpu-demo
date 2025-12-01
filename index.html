@@ -3,9 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GPU Power: 3D Web Графика</title>
+    <title>GPU WebGL: Анимированная Сцена</title>
     <style>
-        /* CSS для оформления */
         body { margin: 0; overflow: hidden; font-family: sans-serif; }
         #info {
             position: absolute;
@@ -14,7 +13,7 @@
             transform: translateX(-50%);
             color: white;
             padding: 10px;
-            background: rgba(0, 0, 0, 0.7); /* Более темный фон для контраста */
+            background: rgba(0, 0, 0, 0.7);
             border-radius: 5px;
             z-index: 10;
             text-align: center;
@@ -26,47 +25,80 @@
 </head>
 <body>
     <div id="info">
-        <h3>Аппаратное ускорение (GPU)</h3>
-        <p>Вращайте сферу мышью! Ваши GPU выполняет расчеты освещения и интерактивности в реальном времени.</p>
+        <h3>Аппаратное ускорение GPU</h3>
+        <p>Настоящая 3D-сцена: Анимация частиц, текстуры и реалистичное освещение, обрабатываемые в реальном времени!</p>
     </div>
 
     <script>
-        // Код Three.js (из предыдущего ответа)
         const scene = new THREE.Scene();
         const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
-        const renderer = new THREE.WebGLRenderer({ antialias: true }); 
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
         
         renderer.setSize(window.innerWidth, window.innerHeight);
         document.body.appendChild(renderer.domElement);
-        renderer.setClearColor(0x000033); 
+        renderer.setClearColor(0x050520); // Темно-космический фон
 
         const controls = new THREE.OrbitControls(camera, renderer.domElement);
         controls.enableDamping = true; 
         controls.dampingFactor = 0.05;
-
+        controls.minDistance = 2;
+        controls.maxDistance = 10;
+        
+        // --- 1. Реалистичная Земля (3D-объект) ---
+        const textureLoader = new THREE.TextureLoader();
+        const earthTexture = textureLoader.load('https://threejs.org/examples/textures/planets/earth_atmos_2048.jpg');
+        
         const geometry = new THREE.SphereGeometry(1, 64, 64);
-        const material = new THREE.MeshStandardMaterial({
-            color: 0xcccccc, 
-            metalness: 0.8,    
-            roughness: 0.2     
+        const material = new THREE.MeshPhongMaterial({
+            map: earthTexture,
+            shininess: 5, // Блеск для эффекта освещения
+            specular: 0x333333 // Цвет блика
         });
         
-        const sphere = new THREE.Mesh(geometry, material);
-        scene.add(sphere);
+        const earth = new THREE.Mesh(geometry, material);
+        scene.add(earth);
         
-        const directionalLight = new THREE.DirectionalLight(0xffffff, 2);
-        directionalLight.position.set(5, 10, 7.5);
-        scene.add(directionalLight);
+        // --- 2. Освещение (Симуляция Солнца) ---
+        const sunLight = new THREE.DirectionalLight(0xffffff, 2);
+        sunLight.position.set(10, 0, 5);
+        scene.add(sunLight);
 
-        const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+        const ambientLight = new THREE.AmbientLight(0x404040); // Мягкий рассеянный свет
         scene.add(ambientLight);
         
         camera.position.z = 3;
 
+        // --- 3. Анимация фона (Частицы/Звезды) ---
+        const particlesGeometry = new THREE.BufferGeometry();
+        const particlesCount = 5000;
+        const positions = new Float32Array(particlesCount * 3);
+        
+        for (let i = 0; i < particlesCount * 3; i++) {
+            // Случайное размещение звезд в кубе 50x50x50
+            positions[i] = (Math.random() - 0.5) * 50; 
+        }
+        
+        particlesGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+        
+        const particlesMaterial = new THREE.PointsMaterial({
+            color: 0xffffff,
+            size: 0.05 // Маленькие белые точки
+        });
+        
+        const starField = new THREE.Points(particlesGeometry, particlesMaterial);
+        scene.add(starField);
+        
+        // --- 4. Цикл рендеринга и анимация ---
         function animate() {
             requestAnimationFrame(animate); 
+
+            // Вращение Земли (медленно)
+            earth.rotation.y += 0.003; 
+
+            // Вращение поля звезд (для динамического фона)
+            starField.rotation.y += 0.0005;
+
             controls.update(); 
-            sphere.rotation.y += 0.005;
             renderer.render(scene, camera); 
         }
 
@@ -79,5 +111,4 @@
         });
     </script>
 </body>
-
 </html>
