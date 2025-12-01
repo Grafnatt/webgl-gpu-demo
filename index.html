@@ -80,9 +80,14 @@
         
         particlesGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
         
+        const circleTexture = textureLoader.load('https://threejs.org/examples/textures/sprites/disc.png'); 
+
         const particlesMaterial = new THREE.PointsMaterial({
             color: 0xffffff,
-            size: 0.05 // Маленькие белые точки
+            size: 0.1, // Немного увеличим размер, чтобы было видно круг
+            map: circleTexture, // ПРИМЕНЯЕМ ТЕКСТУРУ КРУГА
+            blending: THREE.AdditiveBlending, // Для эффекта свечения
+            transparent: true // Делаем прозрачным, чтобы видеть эффект blend'инга
         });
         
         const starField = new THREE.Points(particlesGeometry, particlesMaterial);
@@ -112,3 +117,4 @@
     </script>
 </body>
 </html>
+
