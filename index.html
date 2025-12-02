@@ -32,7 +32,7 @@
         
         renderer.setSize(window.innerWidth, window.innerHeight);
         document.body.appendChild(renderer.domElement);
-        renderer.setClearColor(0x050520); // Темно-космический фон
+        renderer.setClearColor(0x050520);
 
         const controls = new THREE.OrbitControls(camera, renderer.domElement);
         controls.enableDamping = true; 
@@ -40,63 +40,60 @@
         controls.minDistance = 2;
         controls.maxDistance = 10;
         
-        // --- 1. Реалистичная Земля (3D-объект) ---
+        //Земля
         const textureLoader = new THREE.TextureLoader();
         const earthTexture = textureLoader.load('./assets/earth.jpg');
         
         const geometry = new THREE.SphereGeometry(1, 64, 64);
         const material = new THREE.MeshPhongMaterial({
             map: earthTexture,
-            shininess: 5, // Блеск для эффекта освещения
-            specular: 0x333333 // Цвет блика
+            shininess: 5,
+            specular: 0x333333
         });
         
         const earth = new THREE.Mesh(geometry, material);
         scene.add(earth);
         
-        // --- 2. Освещение (Симуляция Солнца) ---
+        //Освещение
         const sunLight = new THREE.DirectionalLight(0xffffff, 2);
         sunLight.position.set(10, 0, 5);
         scene.add(sunLight);
 
-        const ambientLight = new THREE.AmbientLight(0x404040); // Мягкий рассеянный свет
+        const ambientLight = new THREE.AmbientLight(0x404040);
         scene.add(ambientLight);
         
         camera.position.z = 3;
 
-        // --- 3. Анимация фона (Частицы/Звезды) ---
+        //Фон
         const particlesGeometry = new THREE.BufferGeometry();
         const particlesCount = 5000;
         const positions = new Float32Array(particlesCount * 3);
         
         for (let i = 0; i < particlesCount * 3; i++) {
-            // Случайное размещение звезд в кубе 50x50x50
             positions[i] = (Math.random() - 0.5) * 50; 
         }
         
         particlesGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
         
-        const circleTexture = textureLoader.load('https://threejs.org/examples/textures/sprites/disc.png'); 
+        const circleTexture = textureLoader.load('./assets/disc.png'); 
 
         const particlesMaterial = new THREE.PointsMaterial({
             color: 0xffffff,
-            size: 0.1, // Немного увеличим размер, чтобы было видно круг
-            map: circleTexture, // ПРИМЕНЯЕМ ТЕКСТУРУ КРУГА
-            blending: THREE.AdditiveBlending, // Для эффекта свечения
-            transparent: true // Делаем прозрачным, чтобы видеть эффект blend'инга
+            size: 0.1,
+            map: circleTexture,
+            blending: THREE.AdditiveBlending,
+            transparent: true
         });
         
         const starField = new THREE.Points(particlesGeometry, particlesMaterial);
         scene.add(starField);
         
-        // --- 4. Цикл рендеринга и анимация ---
+        //рендеринг и анимация
         function animate() {
             requestAnimationFrame(animate); 
 
-            // Вращение Земли (медленно)
             earth.rotation.y += 0.003; 
 
-            // Вращение поля звезд (для динамического фона)
             starField.rotation.y += 0.0005;
 
             controls.update(); 
@@ -113,6 +110,7 @@
     </script>
 </body>
 </html>
+
 
 
 
